@@ -1,4 +1,4 @@
-package org.red.library.serializable;
+package org.red.library.serialize;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -7,6 +7,10 @@ import java.util.Map.Entry;
 import org.red.library.DataMap;
 import org.red.library.DataMapManager;
 
+/**
+ * 데이터를 DataMap으로 직렬화 하는 클래스 DataMap또한 직렬화 시켜야한다.
+ * String변환은 toString으로 String -> SerializeDataMap기능또한 지원한다.
+ */
 public class DataMapConverter {
 
     private static final String TYPE_KEY = "__type__"; // DataMapSerializable 타입 표시용
@@ -17,11 +21,16 @@ public class DataMapConverter {
     private static final String CLASS_KEY = "class";
     private static final String MAP_KEY = "map";
 
-    /** 객체를 DataMap으로 직렬화 */
-    public DataMap serializeObject(Object obj) {
+    /** 
+     * 객체를 DataMap으로 직렬화 
+     */
+    public SerializeDataMap serializeObject(Object obj) {
         if (obj == null) return null;
 
-        SerialzableDataMap result = new SerialzableDataMap();
+        else if (obj instanceof DataMap m && m.isSerialze())
+            throw new IllegalArgumentException("잘못된 DataMap, isSerialize가 false인 dataMap만 serialize가 가능합니다");
+
+        SerializeDataMap result = new SerializeDataMap();
         Class<?> clazz = obj.getClass();
 
         if (obj instanceof DataMapSerializable serializable) {
@@ -31,9 +40,9 @@ public class DataMapConverter {
 
             result.put(TYPE_KEY, clazz.getName());
         } else if (obj instanceof Map<?, ?> map) {
-            Map<String, SerialzableDataMap> data = new HashMap<>();
+            Map<String, SerializeDataMap> data = new HashMap<>();
             for (Map.Entry<?, ?> entry : map.entrySet())
-                data.put(String.valueOf(entry.getKey()), (SerialzableDataMap) serializeObject(entry.getValue()));
+                data.put(String.valueOf(entry.getKey()), (SerializeDataMap) serializeObject(entry.getValue()));
 
             result.put(MAP_KEY, data);
         } else if (obj instanceof Collection) {
@@ -46,7 +55,7 @@ public class DataMapConverter {
             result.put(VALUE_KEY, obj);
         } else if (DataMapManager.containSerializableClass(clazz)) {
             RegisterSerializable serializable = DataMapManager.getSerializableClass(clazz);
-            result = SerialzableDataMap.convert(serializable.serialize(obj));
+            result = SerializeDataMap.convert(serializable.serialize(obj));
             result.put(REGISTER_KEY, clazz.getName());
         } else {
             DataMap fields = new DataMap();
@@ -66,26 +75,29 @@ public class DataMapConverter {
         return result;
     }
 
-    public <T> T deserializeObject(DataMap data, Class<T> clazz) {
+    /**
+     * 클래스로 캐스트해서 불러오기 편하게 할때 쓰는 함수
+     */
+    public <T> T deserializeObject(SerializeDataMap data, Class<T> clazz) {
         return clazz.cast(deserializeObject(data));
     }
 
-    /** DataMap -> 객체 역직렬화 (clazz 인자 없음) */
-    public Object deserializeObject(DataMap data) {
-        System.out.println(data);
+    /** 
+     * DataMap -> 객체 역직렬화 함수
+     */
+    public Object deserializeObject(SerializeDataMap data) {
         if (data == null) return null;
         else if (!data.isSerialze())
             throw new IllegalArgumentException("잘못된 DataMap, isSerialize가 true인 dataMap만 deserialize가 가능합니다");
 
         // 1. DataMapSerializable 객체
         if (data.containsKey(TYPE_KEY)) {
-            System.out.println("1" + data);
             String className = data.getString(TYPE_KEY);
             data.remove(TYPE_KEY);
 
             DataMap m = new DataMap();
             for (Map.Entry<String, Object> entry : data.entrySet())
-                m.put(entry.getKey(), deserializeObject((DataMap) entry.getValue()));
+                m.put(entry.getKey(), deserializeObject((SerializeDataMap) entry.getValue()));
 
             try {
                 Class<?> cls = Class.forName(className);
@@ -110,10 +122,10 @@ public class DataMapConverter {
         }
 
         if (data.containsKey(MAP_KEY)) {
-            SerialzableDataMap map = data.getClass(MAP_KEY, SerialzableDataMap.class);
+            SerializeDataMap map = data.getClass(MAP_KEY, SerializeDataMap.class);
             Map result = new HashMap<>();
             for (Entry<String, Object> entry : map.entrySet())
-                result.put(entry.getKey(), (deserializeObject((SerialzableDataMap) entry.getValue())));
+                result.put(entry.getKey(), (deserializeObject((SerializeDataMap) entry.getValue())));
 
             return result;
         }
@@ -124,7 +136,7 @@ public class DataMapConverter {
             List<?> rawList = data.getList(LIST_KEY, new ArrayList<>());
             for (Object item : rawList) {
                 if (item instanceof DataMap) {
-                    list.add(deserializeObject((SerialzableDataMap) item));
+                    list.add(deserializeObject((SerializeDataMap) item));
                 } else {
                     list.add(item);
                 }
@@ -150,7 +162,7 @@ public class DataMapConverter {
                         field.setAccessible(true);
                         Object val = fields.get(key);
                         if (val instanceof DataMap) {
-                            field.set(instance, deserializeObject((SerialzableDataMap) val));
+                            field.set(instance, deserializeObject((SerializeDataMap) val));
                         } else {
                             field.set(instance, val);
                         }
@@ -168,6 +180,9 @@ public class DataMapConverter {
         return data;
     }
 
+    /**
+     * 지원하는 클래스인지 감지 함수
+     */
     private boolean isPrimitiveOrWrapper(Class<?> clazz) {
         return clazz.isPrimitive()
                 || clazz == Integer.class
@@ -183,7 +198,7 @@ public class DataMapConverter {
     /**
      * 문자열이 { ... } 형태일 때 DataMap으로 복구
      */
-    public SerialzableDataMap stringToSerialzableDataMap(String text) {
+    public SerializeDataMap stringToSerialzableDataMap(String text) {
         text = text.trim();
 
         // {} 제거
@@ -191,38 +206,7 @@ public class DataMapConverter {
             text = text.substring(1, text.length() - 1).trim();
         }
 
-        SerialzableDataMap map = new SerialzableDataMap();
-
-        // key=value 형태의 덩어리를 분리
-        List<String> tokens = splitTopLevel(text, ',');
-
-        for (String token : tokens) {
-            token = token.trim();
-            if (token.isEmpty()) continue;
-
-            int eq = token.indexOf('=');
-            if (eq == -1) continue;
-
-            String key = token.substring(0, eq).trim();
-            String valueStr = token.substring(eq + 1).trim();
-
-            Object value = parseValue(valueStr);
-
-            map.put(key, value);
-        }
-
-        return map;
-    }
-
-    private Map parseMap(String text) {
-        text = text.trim();
-
-        // {} 제거
-        if (text.startsWith("{") && text.endsWith("}")) {
-            text = text.substring(1, text.length() - 1).trim();
-        }
-
-        Map map = new HashMap<>();
+        SerializeDataMap map = new SerializeDataMap();
 
         // key=value 형태의 덩어리를 분리
         List<String> tokens = splitTopLevel(text, ',');

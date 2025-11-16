@@ -5,24 +5,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+
+import org.red.library.serialize.DataMapSerializable;
+
 import java.util.Set;
 import java.util.UUID;
-
-import org.red.library.serializable.DataMapConverter;
-import org.red.library.serializable.DataMapSerializable;
 
 public class DataMap implements DataMapSerializable {
     
     public static DataMap deserialize(DataMap map) {
-        DataMapConverter converter = new DataMapConverter();
         DataMap result = new DataMap();
-
-        //for (Entry<String, Object> entry : map.entrySet()) {
-        //    System.out.println(entry.getKey());
-        //    result.put(entry.getKey(), converter.deserializeObject((DataMap) entry.getValue()));
-        //}
-            
         result.getMap().putAll(map.getMap());
         return result;
     }
@@ -174,14 +166,6 @@ public class DataMap implements DataMapSerializable {
 
     @Override
     public DataMap serialize() {
-        DataMapConverter converter = new DataMapConverter();
-        DataMap result = new DataMap();
-
-        for (Map.Entry<String, Object> entry : this.map.entrySet()) {
-            Object value = entry.getValue();
-            result.put(entry.getKey(), converter.serializeObject(value));
-        }
-
         return this;
     }
 }

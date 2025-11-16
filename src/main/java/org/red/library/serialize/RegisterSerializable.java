@@ -1,4 +1,4 @@
-package org.red.library.serializable;
+package org.red.library.serialize;
 
 import org.red.library.DataMap;
 
