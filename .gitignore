@@ -9,9 +9,7 @@
 out/
 
 #not library
-country/
-gamyung/
-project/
+test/
 
 # Compiled class file
 *.class

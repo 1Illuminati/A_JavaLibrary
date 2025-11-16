@@ -5,32 +5,33 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.red.library.serializable.DataMapConverter;
 import org.red.library.serializable.DataMapSerializable;
-import org.red.library.serializable.RegisterSerializable;
 
 public class DataMap implements DataMapSerializable {
-    private static Map<Class<?>, RegisterSerializable> registerSerializableMap = new HashMap<>();
-
-    public static <T> void registerSerializableClass(Class<T> clazz, RegisterSerializable registerSerializable) {
-        registerSerializableMap.put(clazz, registerSerializable);
-    }
-
-    public static <T> RegisterSerializable getSerializableClass(Class<?> clazz) {
-        return registerSerializableMap.getOrDefault(clazz, null);
-    }
-
-    public static boolean containSerializableClass(Class<?> clazz) {
-        return registerSerializableMap.containsKey(clazz);
-    }
-
+    
     public static DataMap deserialize(DataMap map) {
-        return map;
+        DataMapConverter converter = new DataMapConverter();
+        DataMap result = new DataMap();
+
+        //for (Entry<String, Object> entry : map.entrySet()) {
+        //    System.out.println(entry.getKey());
+        //    result.put(entry.getKey(), converter.deserializeObject((DataMap) entry.getValue()));
+        //}
+            
+        result.getMap().putAll(map.getMap());
+        return result;
     }
 
     private Map<String, Object> map = new HashMap<>();
+
+    public boolean isSerialze() {
+        return false;
+    }
 
     public void copy(DataMap dataMap) {
         map = dataMap.getMap();
@@ -133,7 +134,7 @@ public class DataMap implements DataMapSerializable {
         if (key.contains(".")) throw new IllegalArgumentException("key cannot contain '.'");
         map.put(key, value);
     }
-
+    
     public DataMap set(String key, Object value) {
         put(key, value);
         return this;
@@ -173,6 +174,14 @@ public class DataMap implements DataMapSerializable {
 
     @Override
     public DataMap serialize() {
+        DataMapConverter converter = new DataMapConverter();
+        DataMap result = new DataMap();
+
+        for (Map.Entry<String, Object> entry : this.map.entrySet()) {
+            Object value = entry.getValue();
+            result.put(entry.getKey(), converter.serializeObject(value));
+        }
+
         return this;
     }
 }
