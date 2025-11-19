@@ -6,7 +6,7 @@
 
     <groupId>org.red.library</groupId>
     <artifactId>data</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <name>A_JavaLibrary</name>
     <packaging>jar</packaging>
 
@@ -31,6 +31,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
         </plugins>
     </build>
 
@@ -42,4 +47,10 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>https://nexus.redkiller.org/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

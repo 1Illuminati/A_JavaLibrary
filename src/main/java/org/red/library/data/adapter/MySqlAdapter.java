@@ -1,15 +1,13 @@
-package org.red.library.adapter;
+package org.red.library.data.adapter;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.red.library.serialize.DataMapConverter;
-import org.red.library.serialize.SerializeDataMap;
+import org.red.library.data.serialize.SerializeDataMap;
 
 public class MySqlAdapter extends DatabaseAdapter {
-    private static final DataMapConverter CONVERTER = new DataMapConverter();
     public MySqlAdapter(Config config) throws SQLException {
         super(config);
 
@@ -27,12 +25,13 @@ public class MySqlAdapter extends DatabaseAdapter {
         try (PreparedStatement ps = super.getConnection().prepareStatement(loadSQL)) {
             ps.setString(1, key);
             ResultSet rs = ps.executeQuery(); 
-            if (rs.next()) return CONVERTER.stringToSerialzableDataMap(rs.getString("data"));
+            if (rs.next()) return SerializeDataMap.stringToSerialzableDataMap(rs.getString("data"));
         } catch (SQLException e) {
             e.printStackTrace();
+            return null;
         }
-
-        return new SerializeDataMap();
+        
+        return null;
     }
 
     @Override

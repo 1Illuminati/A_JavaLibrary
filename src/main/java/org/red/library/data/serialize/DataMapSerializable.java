@@ -1,6 +1,6 @@
-package org.red.library.serialize;
+package org.red.library.data.serialize;
 
-import org.red.library.DataMap;
+import org.red.library.data.DataMap;
 
 /**
  * DataMap으로 저장이 가능한 클래스를 만들때 implements하는 클래스

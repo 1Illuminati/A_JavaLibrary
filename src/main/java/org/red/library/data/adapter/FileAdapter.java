@@ -1,4 +1,4 @@
-package org.red.library.adapter;
+package org.red.library.data.adapter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,16 +7,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.red.library.serialize.SerializeDataMap;
+import org.red.library.data.DataMapManager;
+import org.red.library.data.serialize.SerializeDataMap;
+
 public class FileAdapter implements IAdapter {
     private final File directory;
 
     public FileAdapter(String directory) {
         this(new File(directory));
-    }
-
-    private File getFile(String key) {
-        return new File(directory, key + ".dat");
     }
 
     public FileAdapter(File directory) {
@@ -26,12 +24,17 @@ public class FileAdapter implements IAdapter {
         this.directory = directory;
     }
 
+    private File getFile(String key) {
+        return new File(directory, key + ".dat");
+    }
+
     @Override
     public SerializeDataMap loadDataMap(String key) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(getFile(key)))) {
             return (SerializeDataMap) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -54,5 +57,4 @@ public class FileAdapter implements IAdapter {
         File file = getFile(key);
         if (file.exists()) file.delete();
     }
-
 }

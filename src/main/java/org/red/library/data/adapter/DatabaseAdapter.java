@@ -1,8 +1,10 @@
-package org.red.library.adapter;
+package org.red.library.data.adapter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import org.red.library.data.DataMapManager;
 
 public abstract class DatabaseAdapter implements IAdapter {
 

@@ -1,6 +1,7 @@
-package org.red.library.adapter;
+package org.red.library.data.adapter;
 
-import org.red.library.serialize.SerializeDataMap;
+import org.red.library.data.DataMapManager;
+import org.red.library.data.serialize.SerializeDataMap;
 
 public interface IAdapter {
     

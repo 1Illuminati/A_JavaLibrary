@@ -1,4 +1,4 @@
-package org.red.library;
+package org.red.library.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.red.library.serialize.DataMapSerializable;
+import org.red.library.data.serialize.DataMapSerializable;
 
 import java.util.Set;
 import java.util.UUID;
