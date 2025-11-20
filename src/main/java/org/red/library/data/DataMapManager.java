@@ -9,9 +9,17 @@ import org.red.library.data.serialize.RegisterSerializable;
 import org.red.library.data.serialize.SerializeDataMap;
 
 public class DataMapManager {
-    private final HashMap<String, IAdapter> map = new HashMap<>();
+    private final IAdapter adapter;
     private final DataMapConverter converter = new DataMapConverter(this);
     private Map<Class<?>, RegisterSerializable> registerSerializableMap = new HashMap<>();
+
+    public DataMapManager(IAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    public IAdapter getAdapter() {
+        return this.adapter;
+    }
 
     public <T> void registerSerializableClass(Class<T> clazz, RegisterSerializable<T> registerSerializable) {
         registerSerializableMap.put(clazz, registerSerializable);
@@ -25,44 +33,22 @@ public class DataMapManager {
         return registerSerializableMap.containsKey(clazz);
     }
 
-    public void registerAdapter(String type, IAdapter adapter) {
-        map.put(type, adapter);
-    }
-
-    public boolean contain(String type) {
-        return map.containsKey(type);
-    }
-
-    public void delete(String type) {
-        if (contain(type)) map.remove(type);
-    }
-
-    public IAdapter get(String type) {
-        return map.getOrDefault(type, null);
-    }
-
-    public void saveDataMap(String type, String key, DataMap map) {
-        if (!contain(type)) throw new IllegalStateException(type + " Adapter is Null");
-
+    public void saveDataMap(String key, DataMap map) {
         SerializeDataMap serMap = converter.serializeObject(map);
-        get(type).saveDataMap(key, serMap);
+        adapter.saveDataMap(key, serMap);
     }
 
-    public DataMap loadDataMap(String type, String key) {
-        if (!contain(type)) throw new IllegalStateException(type + " Adapter is Null");
-
-        SerializeDataMap serMap = get(type).loadDataMap(key);
+    public DataMap loadDataMap(String key) {
+        SerializeDataMap serMap = adapter.loadDataMap(key);
         return this.converter.deserializeObject(serMap, DataMap.class);
     }
 
-    public void deleteDataMap(String type, String key) {
-        if (!contain(type)) throw new IllegalStateException(type + " Adapter is Null");
-        get(type).deleteDataMap(key);
+    public void deleteDataMap(String key) {
+        adapter.deleteDataMap(key);
     }
 
-    public boolean containDataMap(String type, String key) {
-        if (!contain(type)) throw new IllegalStateException(type + " Adapter is Null");
-        return get(type).containDataMap(key);
+    public boolean containDataMap(String key) {
+        return adapter.containDataMap(key);
     }
 
     public DataMapConverter getConverter() {
