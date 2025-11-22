@@ -1,9 +1,12 @@
 package org.red.library.data.adapter;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.red.library.data.serialize.SerializeDataMap;
 
@@ -82,6 +85,26 @@ public class MySqlAdapter extends DatabaseAdapter {
     @Override
     public String getUrl(String host, String database, int port) {
         return String.format("jdbc:%s://%s:%d/%s?useSSL=false&serverTimezone=UTC", "mysql", host, port, database);
+    }
+
+    @Override
+    public Set<String> loadAllKey() {
+        Set<String> keys = new HashSet<>();
+        String sql = "SELECT `key` FROM `" + tableName() + "`;";
+
+        try (Connection connection = getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                keys.add(resultSet.getString("key"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return keys;
     }
 
 }

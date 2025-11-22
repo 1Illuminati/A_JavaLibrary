@@ -1,6 +1,7 @@
 package org.red.library.data.adapter;
 
-import org.red.library.data.DataMapManager;
+import java.util.Set;
+
 import org.red.library.data.serialize.SerializeDataMap;
 
 public interface IAdapter {
@@ -12,4 +13,6 @@ public interface IAdapter {
     boolean containDataMap(String key);
 
     void deleteDataMap(String key);
+
+    Set<String> loadAllKey();
 }

@@ -6,8 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.red.library.data.DataMapManager;
 import org.red.library.data.serialize.SerializeDataMap;
 
 public class FileAdapter implements IAdapter {
@@ -56,5 +57,20 @@ public class FileAdapter implements IAdapter {
     public void deleteDataMap(String key) {
         File file = getFile(key);
         if (file.exists()) file.delete();
+    }
+
+    @Override
+    public Set<String> loadAllKey() {
+        Set<String> keys = new HashSet<>();
+        File[] files = this.directory.listFiles();
+
+        if (files == null) return keys;
+
+        for (File file : files) {
+            if (!file.isFile() || !file.getName().contains(".dat")) continue;
+            keys.add(file.getName().substring(0, file.getName().length() - 4)); 
+        }
+
+        return keys;
     }
 }
