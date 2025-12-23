@@ -19,6 +19,8 @@ public class FileAdapter implements IAdapter {
     }
 
     public FileAdapter(File directory) {
+        if (!directory.exists())
+            directory.mkdirs();
         if (!directory.isDirectory())
             throw new IllegalArgumentException("file must be directory");
 
