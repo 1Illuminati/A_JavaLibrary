@@ -2,6 +2,7 @@ package org.red.library.data.adapter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.red.library.data.exception.KeyNotFoundException;
 import org.red.library.data.serialize.SerializeDataMap;
 
 public class FileAdapter implements IAdapter {
@@ -32,13 +34,15 @@ public class FileAdapter implements IAdapter {
     }
 
     @Override
-    public SerializeDataMap loadDataMap(String key) {
+    public SerializeDataMap loadDataMap(String key) throws KeyNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(getFile(key)))) {
             return (SerializeDataMap) ois.readObject();
+        } catch (FileNotFoundException e) {
+            throw new KeyNotFoundException();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return null;
-        }
+        } 
     }
 
     @Override

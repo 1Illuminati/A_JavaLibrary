@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.red.library.data.exception.KeyNotFoundException;
 import org.red.library.data.serialize.SerializeDataMap;
 
 public class MySqlAdapter extends DatabaseAdapter {
@@ -22,7 +23,7 @@ public class MySqlAdapter extends DatabaseAdapter {
     }
 
     @Override
-    public SerializeDataMap loadDataMap(String key) {
+    public SerializeDataMap loadDataMap(String key) throws KeyNotFoundException {
         String loadSQL = "SELECT `data` FROM `" + tableName() + "` WHERE `key` = ?";
 
         try (PreparedStatement ps = super.getConnection().prepareStatement(loadSQL)) {
@@ -30,11 +31,10 @@ public class MySqlAdapter extends DatabaseAdapter {
             ResultSet rs = ps.executeQuery(); 
             if (rs.next()) return SerializeDataMap.stringToSerialzableDataMap(rs.getString("data"));
         } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException(e);
         }
         
-        return null;
+        throw new KeyNotFoundException();
     }
 
     @Override

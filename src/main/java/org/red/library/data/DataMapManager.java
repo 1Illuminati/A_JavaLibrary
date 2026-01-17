@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.red.library.data.adapter.IAdapter;
+import org.red.library.data.exception.KeyNotFoundException;
 import org.red.library.data.serialize.DataMapConverter;
 import org.red.library.data.serialize.RegisterSerializable;
 import org.red.library.data.serialize.SerializeDataMap;
@@ -39,7 +40,14 @@ public class DataMapManager {
     }
 
     public DataMap loadDataMap(String key) {
-        SerializeDataMap serMap = adapter.loadDataMap(key);
+        SerializeDataMap serMap;
+        
+        try {
+            serMap = adapter.loadDataMap(key);
+        } catch (KeyNotFoundException e) {
+            serMap = new SerializeDataMap();
+        }
+
         return this.converter.deserializeObject(serMap, DataMap.class);
     }
 
