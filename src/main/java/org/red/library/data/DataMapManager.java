@@ -60,6 +60,6 @@ public class DataMapManager {
     }
 
     public DataMapConverter getConverter() {
-        return this.getConverter();
+        return this.converter;
     }
 }

@@ -79,6 +79,7 @@ public class SerializeDataMap extends DataMap implements Serializable {
         // 숫자인지 체크
         if (isInteger(v)) return Integer.parseInt(v);
         if (isDouble(v)) return Double.parseDouble(v);
+        if (isBoolean(v)) return Boolean.parseBoolean(v);
 
         // 문자열로 처리 (따옴표 없어도 문자열로 본다)
         return v;
@@ -136,7 +137,6 @@ public class SerializeDataMap extends DataMap implements Serializable {
     }
 
 
-    // 숫자 판별 유틸
     private static boolean isInteger(String s) {
         try {
             Integer.parseInt(s);
@@ -149,5 +149,9 @@ public class SerializeDataMap extends DataMap implements Serializable {
             Double.parseDouble(s);
             return s.contains(".");
         } catch (Exception e) { return false; }
+    }
+
+    private static boolean isBoolean(String s) {
+        return "true".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s);
     }
 }

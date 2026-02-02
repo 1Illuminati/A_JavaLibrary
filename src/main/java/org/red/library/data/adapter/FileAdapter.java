@@ -36,7 +36,7 @@ public class FileAdapter implements IAdapter {
     @Override
     public SerializeDataMap loadDataMap(String key) throws KeyNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(getFile(key)))) {
-            return (SerializeDataMap) ois.readObject();
+            return SerializeDataMap.stringToSerialzableDataMap((String) ois.readObject());
         } catch (FileNotFoundException e) {
             throw new KeyNotFoundException();
         } catch (IOException | ClassNotFoundException e) {
@@ -48,7 +48,7 @@ public class FileAdapter implements IAdapter {
     @Override
     public void saveDataMap(String key, SerializeDataMap map) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(getFile(key)))) {
-            oos.writeObject(map);
+            oos.writeObject(map.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

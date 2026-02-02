@@ -109,6 +109,7 @@ public class DataMapConverter {
                 Method method = cls.getDeclaredMethod("deserialize", DataMap.class);
                 return method.invoke(null, m);
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

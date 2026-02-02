@@ -84,7 +84,7 @@ public class MySqlAdapter extends DatabaseAdapter {
 
     @Override
     public String getUrl(String host, String database, int port) {
-        return String.format("jdbc:%s://%s:%d/%s?useSSL=false&serverTimezone=UTC", "mysql", host, port, database);
+        return String.format("jdbc:%s://%s:%d/%s?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true", "mysql", host, port, database);
     }
 
     @Override
