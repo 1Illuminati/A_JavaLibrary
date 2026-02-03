@@ -3,6 +3,7 @@ package org.red.library.data.serialize;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.red.library.data.DataMap;
 
@@ -25,6 +26,32 @@ public class SerializeDataMap extends DataMap implements Serializable {
     @Override
     public boolean isSerialze() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        
+        boolean first = true;
+        for (Map.Entry<String, Object> entry : super.getMap().entrySet()) {
+            if (!first) {
+                sb.append(", ");
+            }
+            first = false;
+            
+            sb.append(entry.getKey()).append("=");
+            
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                sb.append("\"").append(value).append("\"");
+            } else {
+                sb.append(value);
+            }
+        }
+        
+        sb.append("}");
+        return sb.toString();
     }
 
     /**
@@ -80,6 +107,7 @@ public class SerializeDataMap extends DataMap implements Serializable {
         if (isInteger(v)) return Integer.parseInt(v);
         if (isDouble(v)) return Double.parseDouble(v);
         if (isBoolean(v)) return Boolean.parseBoolean(v);
+        if (isString(v)) return v.substring(1, v.length() - 1);
 
         // 문자열로 처리 (따옴표 없어도 문자열로 본다)
         return v;
@@ -153,5 +181,9 @@ public class SerializeDataMap extends DataMap implements Serializable {
 
     private static boolean isBoolean(String s) {
         return "true".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s);
+    }
+
+    private static boolean isString(String s) {
+        return s.startsWith("\"") && s.endsWith("\"");
     }
 }
